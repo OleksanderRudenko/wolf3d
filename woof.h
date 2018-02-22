@@ -1,38 +1,38 @@
 #ifndef WOOF_H
 #define WOOF_H
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include <math.h>
-#include <mlx.h>
+#include "./libft/libft.h"
 #include <stdlib.h>
-# include "./libft/libft.h"
+#include "./minilibx/mlx.h"
 
 #define mapWidth 24
 #define mapHeight 24
 #define WIDTH 640
 #define HEIGHT 640
-#define KEY_UP 126
-#define KEY_DOWN 125
-#define KEY_RIGHT 124
-#define KEY_LEFT 123
 #define NUM_TEXTURES 5
 #define TEXTURE_H 64
 #define TEXTURE_W 64
+// #define KEY_UP 126
+// #define KEY_DOWN 125
+// #define KEY_RIGHT 124
+// #define KEY_LEFT 123
 
-typedef struct 		s_wolf2
+//////linux
+#define KEY_UP 65362
+#define KEY_DOWN 65364
+#define KEY_RIGHT 65363
+#define KEY_LEFT 65361
+
+
+typedef struct 		s_woof
 {
 	SDL_Window		*win;
-	SDL_Event		window_event;
-	SDL_Surface		*image_surf;
-	SDL_Surface		*image_surf2;
-	SDL_Surface		**walls_textures;
-	SDL_Surface		*current_image;
-	SDL_Surface		*win_surf;
-	SDL_Rect		draw_rect;
-	SDL_Renderer	*rend;
-	SDL_Texture		*curr_texture;
-}     t_wolf2;
+	SDL_Surface		*im_surf;
+	SDL_Surface		*window_surface;
 
+}					t_woof;
 typedef struct 		s_wolf
 {
 	void			        *mlx;
@@ -53,28 +53,6 @@ typedef struct	s_put_image
     int			color;
 	int			pixel;
 }				t_put_image;
-
-typedef struct	s_im
-{
-	int		a;
-	int		b;
-	int		c;
-	int		color;
-	int		dx;
-	int		dy;
-	int		sx;
-	int		sy;
-	int		x0;//start point
-	int		y0;//start point
-	int		x1;//end point
-	int		y1;//end point
-	int		x;
-	int		y;
-	int		d;
-	int		d1;
-	int		d2;
-	int		length;
-}				t_im;
 
 typedef struct s_map
 {
@@ -99,10 +77,10 @@ typedef struct s_textures
 
 void	get_image(t_wolf *one);
 void    pixel_image(char *one, int x, int y, int color);
-void    ar_line(t_wolf *one, t_im *s);
-void  draw_map(t_wolf *one);
+
+void  draw_map(t_wolf *one, t_woof *s);
+
 void  init_values(t_wolf *one);
 void get_textures(t_wolf *one);
-//SDL_Surface *load_texture(char *filepath, SDL_Renderer *render_target);
-
+SDL_Surface *load_surf(char *filepath);
 #endif
