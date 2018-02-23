@@ -1,120 +1,79 @@
 #include "woof.h"
 
-int worldMap[mapWidth][mapHeight]=
-{
-  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,2,2,2,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1},
-  {1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,3,0,0,0,3,0,0,0,1},
-  {1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,2,2,0,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,4,0,0,0,0,5,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,4,0,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
-};
+#include "woof.h"
 
-int			mouse_hook(int key, int x, int y, t_wolf *one)
+int			key_hook(t_sdl_manange *s)
 {
-  printf("x: %d y: %d \n",x, y);
-  return (0);
+    //move forward if no wall in front of you
+    while (SDL_PollEvent(&s->event))
+    {
+      if (s->event.key.keysym.sym == SDLK_w)
+      {
+        if(s->floor[(int)(s->map->ppos_x + s->map->dir_x * s->map->mv_speed)][(int)(s->map->ppos_y)] == 0)
+        {
+          s->map->ppos_x += s->map->dir_x * s->map->mv_speed;
+        }
+        if(s->floor[(int)(s->map->ppos_x)][(int)(s->map->ppos_y + s->map->dir_y * s->map->mv_speed)] == 0)
+        {
+          s->map->ppos_y += s->map->dir_y * s->map->mv_speed;
+        }
+      }
+      // //move backwards if no wall behind you
+      if (s->event.key.keysym.sym == SDLK_s)
+      {
+        if(s->floor[(int)(s->map->ppos_x - s->map->dir_x * s->map->mv_speed)][(int)(s->map->ppos_y)] == 0)
+        {
+          s->map->ppos_x -= s->map->dir_x * s->map->mv_speed;
+        }
+        if(s->floor[(int)(s->map->ppos_x)][(int)(s->map->ppos_y - s->map->dir_y * s->map->mv_speed)] == 0)
+        {
+          s->map->ppos_y -= s->map->dir_y * s->map->mv_speed;
+        }
+      }
+      // //rotate to the right
+      if (s->event.key.keysym.sym == SDLK_d)
+      {
+        //both camera direction and camera plane must be rotated
+        double oldDirX = s->map->dir_x;
+        s->map->dir_x = s->map->dir_x * cos(-s->map->rot_speed) - s->map->dir_y * sin(-s->map->rot_speed);
+        s->map->dir_y = oldDirX * sin(-s->map->rot_speed) + s->map->dir_y * cos(-s->map->rot_speed);
+        double oldPlaneX = s->map->pangle_x;
+        s->map->pangle_x = s->map->pangle_x * cos(-s->map->rot_speed) - s->map->pangle_y * sin(-s->map->rot_speed);
+        s->map->pangle_y = oldPlaneX * sin(-s->map->rot_speed) + s->map->pangle_y * cos(-s->map->rot_speed);
+      }
+      // //rotate to the left
+      if (s->event.key.keysym.sym == SDLK_a)
+      {
+        //both camera direction and camera plane must be rotated
+        double oldDirX = s->map->dir_x;
+        s->map->dir_x = s->map->dir_x * cos(s->map->rot_speed) - s->map->dir_y * sin(s->map->rot_speed);
+        s->map->dir_y = oldDirX * sin(s->map->rot_speed) + s->map->dir_y * cos(s->map->rot_speed);
+        double oldPlaneX = s->map->pangle_x;
+        s->map->pangle_x = s->map->pangle_x * cos(s->map->rot_speed) - s->map->pangle_y * sin(s->map->rot_speed);
+        s->map->pangle_y = oldPlaneX * sin(s->map->rot_speed) + s->map->pangle_y * cos(s->map->rot_speed);
+      }
+    }
+     return (0);
 }
 
-int			key_hook(int key, t_wolf *one)
-{
-	printf("%d\n",key);
-	if (key == 65307)
-		exit(0);
-//    ft_bzero(one->mal->pic, WIDTH * HEIGHT * one->mal->bpp);
-//    mlx_clear_window(one->mlx, one->win);
-//    float moveSpeed = 0.5; //the constant value is in squares/second
-//     float rotSpeed = 0.2; //the constant value is in radians/second
-//     //move forward if no wall in front of you
-//     if (key == KEY_UP)
-//     {
-//       if(worldMap[(int)(one->map->ppos_x + one->map->dir_x * moveSpeed)][(int)(one->map->ppos_y)] == 0)
-//       {
-//         one->map->ppos_x += one->map->dir_x * moveSpeed;
-//       }
-//       if(worldMap[(int)(one->map->ppos_x)][(int)(one->map->ppos_y + one->map->dir_y * moveSpeed)] == 0)
-//       {
-//         one->map->ppos_y += one->map->dir_y * moveSpeed;
-//       }
-//       draw_map(one);
-//     }
-//     // //move backwards if no wall behind you
-//     if (key == KEY_DOWN)
-//     {
-//       if(worldMap[(int)(one->map->ppos_x - one->map->dir_x * moveSpeed)][(int)(one->map->ppos_y)] == 0)
-//       {
-//         one->map->ppos_x -= one->map->dir_x * moveSpeed;
-//       }
-//       if(worldMap[(int)(one->map->ppos_x)][(int)(one->map->ppos_y - one->map->dir_y * moveSpeed)] == 0)
-//       {
-//         one->map->ppos_y -= one->map->dir_y * moveSpeed;
-//       }
-//       draw_map(one);
-//     }
-//     // //rotate to the right
-//     if (key == KEY_RIGHT)
-//     {
-//       //both camera direction and camera plane must be rotated
-//       double oldDirX = one->map->dir_x;
-//       one->map->dir_x = one->map->dir_x * cos(-rotSpeed) - one->map->dir_y * sin(-rotSpeed);
-//       one->map->dir_y = oldDirX * sin(-rotSpeed) + one->map->dir_y * cos(-rotSpeed);
-//       double oldPlaneX = one->map->plane_x;
-//       one->map->plane_x = one->map->plane_x * cos(-rotSpeed) - one->map->plane_y * sin(-rotSpeed);
-//       one->map->plane_y = oldPlaneX * sin(-rotSpeed) + one->map->plane_y * cos(-rotSpeed);
-//       draw_map(one);
-//     }
-//     // //rotate to the left
-//     if (key == KEY_LEFT)
-//     {
-//       //both camera direction and camera plane must be rotated
-//       double oldDirX = one->map->dir_x;
-//       one->map->dir_x = one->map->dir_x * cos(rotSpeed) - one->map->dir_y * sin(rotSpeed);
-//       one->map->dir_y = oldDirX * sin(rotSpeed) + one->map->dir_y * cos(rotSpeed);
-//       double oldPlaneX = one->map->plane_x;
-//       one->map->plane_x = one->map->plane_x * cos(rotSpeed) - one->map->plane_y * sin(rotSpeed);
-//       one->map->plane_y = oldPlaneX * sin(rotSpeed) + one->map->plane_y * cos(rotSpeed);
-//       draw_map(one);
-//     }
-     return (0);
- }
 
-void  draw_map(t_wolf *one, t_woof *s)
+void  draw_map(t_sdl_manange *s)
 {
   int x = 0;
-  unsigned int *buffer;
-  
+
     while (x < WIDTH)
     {
       //calculate ray position and direction
-      float cameraX = 2 * x / (float)(WIDTH) - 1; //x-coordinate in camera space
-      float rayDirX = one->map->dir_x + one->map->plane_x * cameraX;
-      float rayDirY = one->map->dir_y + one->map->plane_y * cameraX;
-      
+      float RayAngle = 2 * x / (float)(WIDTH)-1; //x-coordinate in camera space //x-coordinate in camera space
+      float rayDirX = s->map->dir_x + s->map->pangle_x * RayAngle;
+      float rayDirY = s->map->dir_y + s->map->pangle_y * RayAngle;
       //which box of the map we're in
-      int mapX = (int)(one->map->ppos_x);
-      int mapY = (int)(one->map->ppos_y);
+      int mapX = (int)(s->map->ppos_x);
+      int mapY = (int)(s->map->ppos_y);
 
       //length of ray from current position to next x or y-side
-      float sideDistX;
-      float sideDistY;
+      float ray_len_x;
+      float ray_len_y;
 
        //length of ray from one x or y-side to next x or y-side
       float deltaDistX = fabs(1 / rayDirX);
@@ -131,53 +90,48 @@ void  draw_map(t_wolf *one, t_woof *s)
       if (rayDirX < 0)
       {
         stepX = -1;
-        sideDistX = (one->map->ppos_x - mapX) * deltaDistX;
+        ray_len_x = (s->map->ppos_x - mapX) * deltaDistX;
       }
       else
       {
         stepX = 1;
-        sideDistX = (mapX + 1.0 - one->map->ppos_x) * deltaDistX;
+        ray_len_x = (mapX + 1.0 - s->map->ppos_x) * deltaDistX;
       }
       if (rayDirY < 0)
       {
         stepY = -1;
-        sideDistY = (one->map->ppos_y - mapY) * deltaDistY;
+        ray_len_y = (s->map->ppos_y - mapY) * deltaDistY;
       }
       else
       {
         stepY = 1;
-        sideDistY = (mapY + 1.0 - one->map->ppos_y) * deltaDistY;
+        ray_len_y = (mapY + 1.0 - s->map->ppos_y) * deltaDistY;
       }
-      
       //perform DDA
       while (hit == 0)
       {
         //jump to next map square, OR in x-direction, OR in y-direction
-        if (sideDistX < sideDistY)
+        if (ray_len_x < ray_len_y)
         {
-          sideDistX += deltaDistX;
+          ray_len_x += deltaDistX;
           mapX += stepX;
           side = 0;
         }
         else
         {
-          sideDistY += deltaDistY;
+          ray_len_y += deltaDistY;
           mapY += stepY;
           side = 1;
         }
         //Check if ray has hit a wall
-        if (worldMap[mapX][mapY] > 0)
-        {
-          hit = 1;
-        }
+       hit = s->floor[mapX][mapY] > 0 ? 1 : 0;
       }
       //Calculate distance projected on camera direction (Euclidean distance will give fisheye effect!)
       if (side == 0)
-        perpWallDist = (mapX - one->map->ppos_x + (1 - stepX) / 2) / rayDirX;
+        perpWallDist = (mapX - s->map->ppos_x + (1 - stepX) / 2) / rayDirX;
       else
-        perpWallDist = (mapY - one->map->ppos_y + (1 - stepY) / 2) / rayDirY;
+        perpWallDist = (mapY - s->map->ppos_y + (1 - stepY) / 2) / rayDirY;
 
-      
       //Calculate height of line to draw on screen
       int lineHeight = (int)(HEIGHT / perpWallDist);
 
@@ -189,145 +143,98 @@ void  draw_map(t_wolf *one, t_woof *s)
       if (drawEnd >= HEIGHT)
         drawEnd = HEIGHT - 1;
 
-     int n = 0;
+    int n = 0;
       //choose wall color
-   	if (worldMap[mapX][mapY] == 1)
+   	if (s->floor[mapX][mapY] == 1)
 			n = 0;
-		else if (worldMap[mapX][mapY] == 2)
+		else if (s->floor[mapX][mapY] == 2)
 			n = 1;
-		else if (worldMap[mapX][mapY] == 3)
+		else if (s->floor[mapX][mapY] == 3)
 			n = 2;
-		else if (worldMap[mapX][mapY] == 4)
+		else if (s->floor[mapX][mapY] == 4)
 			n = 3;
-    else if (worldMap[mapX][mapY] == 6)
+    else if (s->floor[mapX][mapY] == 6)
 			n = 4;
 		else
 			n = 0;
       //give x and y sides different brightness
 
-
-         double wallX; //where exactly the wall was hit
-      if (side == 0)
-      {
-        wallX = one->map->ppos_y + perpWallDist * rayDirY;
+     double wallX; //where exactly the wall was hit
+    if (side == 0)
+    {
+      wallX = s->map->ppos_y + perpWallDist * rayDirY;
       }
-      else           
+      else
       {
-        wallX = one->map->ppos_x + perpWallDist * rayDirX;
+        wallX = s->map->ppos_x + perpWallDist * rayDirX;
       }
       wallX -= floor(wallX);
 
-      int texX = (int)(wallX * (double)(TEXTURE_W));
+      //x coordinate on the texture
+      int texX = (int)(wallX * (double)(s->im_surf[n]->w));
       if(side == 0 && rayDirX > 0)
         {
-          texX = TEXTURE_W - texX - 1;
+          texX = s->im_surf[n]->w - texX - 1;
         };
       if(side == 1 && rayDirY < 0)
       {
-        texX = TEXTURE_W - texX - 1;
+        texX = s->im_surf[n]->w - texX - 1;
       };
 
       int y = drawStart;
      
       int d;
-      buffer = (unsigned int *)s->im_surf->pixels + drawStart * s->im_surf->w + x;
+      s->map->buffer = (unsigned int *)s->win_surface->pixels + drawStart * s->win_surface->w + x;
       while (y < drawEnd)
       {
           d = y * 256 - HEIGHT * 128 + lineHeight * 128;
-          int texY = ((d * TEXTURE_W / lineHeight) / 256);
-          // one->mal->pic[4 * (WIDTH * y + x)] = one->textur[n].lll[(4 * (TEXTURE_W * texY + texX))];
-          // one->mal->pic[(4 * (WIDTH * y + x))+1] = one->textur[n].lll[(4 * (TEXTURE_W * texY + texX))+1];
-          // one->mal->pic[(4 * (WIDTH * y + x))+2] = one->textur[n].lll[(4 * (TEXTURE_W * texY + texX))+2];
-          //surf->pixels = (unsigned int *)one->textur[n].lll[(4 * (TEXTURE_W * texY + texX))];
-          buffer = &((unsigned int *)s->im_surf->pixels)[s->im_surf->h * texY + texX];
-          buffer += WIDTH;
+          int texY = ((d * s->im_surf[n]->w / lineHeight) / 256);
+          //if (texX >= 0 && texX < s->im_surf[n]->h && texY >= 0 && texY < s->im_surf[n]->w)
+            *s->map->buffer = ((unsigned int *)s->im_surf[n]->pixels)[s->im_surf[n]->h * texY + texX];
+          s->map->buffer += WIDTH;
           y++;
       }
       x++;
     }
-    //SDL_BlitSurface(s->im_surf, NULL, s->window_surface, NULL);
-    //mlx_put_image_to_window(one->mlx, one->win, one->mal->d_pic, 0, 0);
 }
 
-void  init_values(t_wolf *one)
+void	print_list(t_flist *begin)
 {
-  one->map = (t_map *)malloc(sizeof(t_map));
-
-  one->map->ppos_x = 15;
-  one->map->ppos_y = 12;
-  one->map->dir_x = -1;
-  one->map->dir_y = 0;
-  one->map->plane_x = 0;
-  one->map->plane_y = 0.66;
+  t_flist *tmp;
+  tmp = begin;
+	while (tmp->next != NULL)
+	{
+		ft_putendl(tmp->line);
+		tmp = tmp->next;
+	}
 }
 
-// int		main()
-// {
-// 	// SDL_Init(SDL_INIT_EVERYTHING);
-// 	// //SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO);
-// 	// SDL_Window *win = 0;
-// 	// SDL_Renderer *ren = 0;
-// 	// win = SDL_CreateWindow("MAIN", SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED ,640, 480, 0);
-//   t_wolf  one;
-//   one.mlx = mlx_init();
-//   one.win = mlx_new_window(one.mlx, WIDTH, HEIGHT, "wolf");
-//   get_image(&one);
-//   get_textures(&one);
-//   init_values(&one);
-//   draw_map(&one);
-
-//   mlx_hook(one.win,2,5,key_hook, &one);
-//   mlx_mouse_hook(one.win, mouse_hook, &one);
-// 	mlx_loop(one.mlx);
-// 	return (0);
-// }
-
-
-
-SDL_Surface *load_surf(char *filepath)
+int		main(int argc, char **argv)
 {
-  SDL_Surface *surf = SDL_LoadBMP(filepath);
-  if (surf == NULL)
+  t_sdl_manange wolf;
+  wolf.begin = read_file(argv[1]);
+  print_list(wolf.begin);
+  count_symbols(wolf.begin);
+
+  SDL_Init(SDL_INIT_EVERYTHING);
+  init_values(&wolf);
+  load_textures(&wolf);
+  wolf.floor = init_floor(&wolf);
+  
+  wolf.win = SDL_CreateWindow("Wolf3d", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, 0);
+  wolf.win_surface = SDL_GetWindowSurface(wolf.win);
+  while (1)
   {
-    printf("%s\n", SDL_GetError());
-  }
-  return (surf);
-}
-
-
-int main (int argc, char **argv)
-{
-
-t_woof one;
-t_wolf two;
-
-   two.mlx = mlx_init();
-   get_image(&two);
-   get_textures(&two);
-   init_values(&two);
-
-  SDL_Init(SDL_INIT_VIDEO);
-
-
-    one.win = SDL_CreateWindow("LOL", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, 0);
-
-   one.window_surface = SDL_GetWindowSurface(one.win);
-    one.im_surf = load_surf("pic/redbrick.bmp");
-    SDL_Event event;
-    draw_map(&two, &one);
-
-    while (1)
+    if (SDL_PollEvent(&wolf.event))
     {
-      if (SDL_PollEvent(&event))
-      {
-        if (SDL_QUIT == event.type || event.key.keysym.sym == SDLK_ESCAPE)
-        {
-          break;
-        }
-      }
-      draw_map(&two, &one);
-     SDL_UpdateWindowSurface(one.win);
+      if (SDL_QUIT == wolf.event.type || wolf.event.key.keysym.sym == SDLK_ESCAPE)
+        break;
     }
-    
-    return (0);
+    ft_bzero(wolf.win_surface->pixels, WIDTH * HEIGHT * 4);
+    key_hook(&wolf);
+    draw_map(&wolf);
+    SDL_UpdateWindowSurface(wolf.win);
+  }
+  SDL_DestroyWindow(wolf.win);
+	return (0);
 }
