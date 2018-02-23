@@ -51,9 +51,9 @@ static int			read_file(int fd, char **str)
 			return (i);
 		}
 	}
+	ft_strdel(&tmp_buff);
 	if (ret == 0 && !ft_strchr(*str, '\n'))
 		return (ft_strlen(*str));
-	ft_strdel(&tmp_buff);
 	return (-1);
 }
 
