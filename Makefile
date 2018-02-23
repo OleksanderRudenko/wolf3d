@@ -2,8 +2,8 @@ NAME = wolf
 
 FILES = main image inites
 #add -Werror
-FLAGS = -I ~/Library/Frameworks/SDL2.framework/Versions/A/Headers -F ~/Library/Frameworks/ -framework SDL2 -Wall -Wextra
-FLAG2 = -lmlx -framework OpenGL -framework AppKit
+FLAGS = -I ~/Library/Frameworks/SDL2.framework/Versions/A/Headers -F ~/Library/Frameworks/ -framework SDL2 
+FLAG2 = -Wall -Wextra
 
 SRC = $(addsuffix .c,$(FILES))
 OBJ = $(addsuffix .o,$(FILES))
