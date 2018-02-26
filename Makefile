@@ -1,28 +1,28 @@
-NAME = wolf
+NAME = wolf3d
 
-FILES = main image inites
-#add -Werror
-FLAGS = -I ~/Library/Frameworks/SDL2.framework/Versions/A/Headers -F ~/Library/Frameworks/ -framework SDL2 
-FLAG2 = -Wall -Wextra
+FILES = main image inites draw_wall draw_f_c
 
 SRC = $(addsuffix .c,$(FILES))
 OBJ = $(addsuffix .o,$(FILES))
-CC = gcc
 
 all: $(NAME)
 
-$(NAME): libft/libft.a 
-	$(CC) $(FLAGS) $(FLAG2) libft/libft.a $(SRC) -o $(NAME)
+$(NAME): libft/libft.a $(OBJ)
+	clang -Wextra -Wall $(OBJ) -lm `sdl2-config --cflags --libs` libft/libft.a -O3 -o $(NAME)
+	rm -f $(OBJ)
+
+%.o: %.c
+	clang -c -Wextra -Wall -o $@ $<
 
 libft/libft.a:
 	make -C libft/
 
 clean:
+	make -C libft/ clean
 	rm -f $(OBJ)
-	make clean -C ./libft/
 	
 fclean : clean
+	make -C libft/ fclean
 	rm -f $(NAME)
-	make fclean -C ./libft/
 	
 re: fclean all
