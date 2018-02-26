@@ -3,7 +3,13 @@
 void  init_values(t_sdl_manange *s)
 {
 	char	**pos;
-
+	count_symbols(s->begin);
+	s->floor = init_floor(s);
+	load_textures(s);
+	SDL_Init(SDL_INIT_EVERYTHING);
+	s->win = SDL_CreateWindow("Wolf3d", SDL_WINDOWPOS_UNDEFINED,
+	SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_OPENGL);
+	s->win_surface = SDL_GetWindowSurface(s->win);
 	pos = ft_strsplit(s->begin->param, ' ');
 	s->map = (t_wolf *)malloc(sizeof(t_wolf));
 	s->map->ppos_x = (float)ft_atoi(pos[0]);
@@ -14,20 +20,22 @@ void  init_values(t_sdl_manange *s)
 	s->map->pangle_y = 0.66;
 	s->map->mv_speed = 0.5f;
 	s->map->rot_speed = 0.2f;
+	s->map->hit = 0;
+	s->map->n = 0;
 	free_double(pos);
 }
 
 void	load_textures(t_sdl_manange *s)
 {
-	s->im_surf = (SDL_Surface **)malloc(sizeof(SDL_Surface *) * 5);
+	s->im_surf = (SDL_Surface **)malloc(sizeof(SDL_Surface *) * 7);
 
-	s->im_surf[0] = load_surf("pic/bs.bmp");
+	s->im_surf[0] = load_surf("pic/bluestone.bmp");
 	s->im_surf[0] = SDL_ConvertSurfaceFormat(s->im_surf[0], SDL_PIXELFORMAT_ARGB8888, 0);
 
-	s->im_surf[1] = load_surf("pic/redbrick.bmp");
+	s->im_surf[1] = load_surf("pic/pw.bmp");
 	s->im_surf[1] = SDL_ConvertSurfaceFormat(s->im_surf[1], SDL_PIXELFORMAT_ARGB8888, 0);
 
-	s->im_surf[2] = load_surf("pic/gs.bmp");
+	s->im_surf[2] = load_surf("pic/st.bmp");
 	s->im_surf[2] = SDL_ConvertSurfaceFormat(s->im_surf[2], SDL_PIXELFORMAT_ARGB8888, 0);
 
 	s->im_surf[3] = load_surf("pic/cs.bmp");
@@ -35,6 +43,12 @@ void	load_textures(t_sdl_manange *s)
   
 	s->im_surf[4] = load_surf("pic/mossy.bmp");
 	s->im_surf[4] = SDL_ConvertSurfaceFormat(s->im_surf[4], SDL_PIXELFORMAT_ARGB8888, 0);
+
+	s->im_surf[5] = load_surf("pic/floor.bmp");
+	s->im_surf[5] = SDL_ConvertSurfaceFormat(s->im_surf[5], SDL_PIXELFORMAT_ARGB8888, 0);
+
+	s->im_surf[6] = load_surf("pic/ceil.bmp");
+	s->im_surf[6] = SDL_ConvertSurfaceFormat(s->im_surf[6], SDL_PIXELFORMAT_ARGB8888, 0);
 }
 
 int	**init_floor(t_sdl_manange *s)
@@ -69,7 +83,7 @@ t_flist		*read_file(char *str)
 	char		*line;
 	t_flist		*xd;
 	t_flist		*tmp;
-
+	
 	if ((fd = open(str, O_RDONLY)) == -1)
 		fck_up();
 	xd = (t_flist *)malloc(sizeof(t_flist));
@@ -141,7 +155,8 @@ void	free_double(char **s)
 
 void	fck_up()
 {
-	ft_putendl("Do not play dirty games with me!");
-	ft_putendl("Come on, gimme horny file");
+	//ft_putendl("Do not play dirty games with me!");
+	//ft_putendl("Come on, gimme horny file");
+	ft_putendl("usage: ./wolf3d [map name]");
 	exit (0);
 }
