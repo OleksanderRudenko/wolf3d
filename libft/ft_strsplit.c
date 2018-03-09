@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_strsplit.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arudenko <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: arudenko <arudenko@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/31 17:33:00 by arudenko          #+#    #+#             */
-/*   Updated: 2017/10/31 17:33:03 by arudenko         ###   ########.fr       */
+/*   Updated: 2018/01/09 16:37:03 by arudenko         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,6 +90,8 @@ static	void	split(char const *s, char c, char **arr)
 		arr[wordnum][lenword] = '\0';
 		wordnum++;
 	}
+	free(n);
+	free(k);
 	arr[wordnum] = 0x00;
 }
 

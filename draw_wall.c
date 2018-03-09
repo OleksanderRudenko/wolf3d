@@ -21,7 +21,8 @@ void  maluy_stinu(t_sdl_manange *s)
     {
       s->map->d = s->map->y * 256 - HEIGHT * 128 + s->map->l_h * 128;
       s->map->t_y = ((s->map->d * 64 / s->map->l_h) / 256);
-      *s->map->buffer = ((unsigned int *)s->im_surf[s->map->n]->pixels)[64 * s->map->t_y + s->map->t_x];
+      if (!*s->map->buffer)
+        *s->map->buffer = ((unsigned int *)s->im_surf[s->map->n]->pixels)[s->im_surf[s->map->n]->h * s->map->t_y + s->map->t_x];
       s->map->buffer += WIDTH;
     }
     maluy_pidlogu_ta_stelu(s);
@@ -31,8 +32,8 @@ void  maluy_stinu(t_sdl_manange *s)
 void  init_for_wall(t_sdl_manange *s)
 {
       s->map->ra = 2 * s->map->x / (float)(WIDTH)-1;
-      s->map->rd_x = s->map->dir_x + s->map->pangle_x * s->map->ra;
-      s->map->rd_y = s->map->dir_y + s->map->pangle_y * s->map->ra;
+      s->map->rd_x = s->map->dir_x + s->map->plane_x * s->map->ra;
+      s->map->rd_y = s->map->dir_y + s->map->plane_y * s->map->ra;
       s->map->m_x = (int)(s->map->ppos_x);
       s->map->m_y = (int)(s->map->ppos_y);
       s->map->dd_x = fabs(1 / s->map->rd_x);
@@ -66,7 +67,7 @@ void  init_for_wall2(t_sdl_manange *s)
 
 void was_hit(t_sdl_manange *s)
 {
-  while (s->map->hit == 0)
+  while (1)
   {
     if (s->map->rlx < s->map->rly)
     {
@@ -80,7 +81,15 @@ void was_hit(t_sdl_manange *s)
       s->map->m_y += s->map->st_y;
       s->map->side = 1;
     }
-    s->map->hit = s->floor[s->map->m_x][s->map->m_y] > 0 ? 1 : 0;
+    if (s->map->x == WIDTH / 2 && s->floor[s->map->m_x][s->map->m_y] == 7 && s->shoot == 1)
+    {
+      s->floor[s->map->m_x][s->map->m_y] = 0;
+      s->shoot = 0;
+    }
+    if (s->floor[s->map->m_x][s->map->m_y] > 0 && s->floor[s->map->m_x][s->map->m_y] != 7)
+      break;
+    if (s->floor[s->map->m_x][s->map->m_y] == 7)
+      sprite_line(s, s->map->x);
   }
   if (s->map->side == 0)
     s->map->pwd = (s->map->m_x - s->map->ppos_x + (1 - s->map->st_x) / 2) / s->map->rd_x;
@@ -98,7 +107,7 @@ void davay_textyry(t_sdl_manange *s)
     s->map->n = 2;
   else if (s->floor[s->map->m_x][s->map->m_y] == 4)
     s->map->n = 3;
-  else if (s->floor[s->map->m_x][s->map->m_y] == 6)
+  else if (s->floor[s->map->m_x][s->map->m_y] == 5)
     s->map->n = 4;
   else
     s->map->n = 0;

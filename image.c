@@ -1,10 +1,13 @@
 #include "woof.h"
 
-SDL_Surface *load_surf(char *filepath)
+SDL_Surface	*load_image(char *filepath)
 {
 	SDL_Surface * surf;
-	surf  = SDL_LoadBMP(filepath);
+	surf  = IMG_Load(filepath);
 	if (surf == NULL)
-		ft_putendl(SDL_GetError());
+	{
+		ft_putendl(IMG_GetError());
+		exit(0);
+	}
 	return (surf);
 }

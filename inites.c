@@ -3,12 +3,12 @@
 void  init_values(t_sdl_manange *s)
 {
 	char	**pos;
+	
 	count_symbols(s->begin);
 	s->floor = init_floor(s);
 	load_textures(s);
-	SDL_Init(SDL_INIT_EVERYTHING);
 	s->win = SDL_CreateWindow("Wolf3d", SDL_WINDOWPOS_UNDEFINED,
-	SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_OPENGL);
+	SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT+100, SDL_WINDOW_OPENGL);
 	s->win_surface = SDL_GetWindowSurface(s->win);
 	pos = ft_strsplit(s->begin->param, ' ');
 	s->map = (t_wolf *)malloc(sizeof(t_wolf));
@@ -16,147 +16,96 @@ void  init_values(t_sdl_manange *s)
 	s->map->ppos_y = (float)ft_atoi(pos[1]);;
 	s->map->dir_x = -1;
 	s->map->dir_y = 0;
-	s->map->pangle_x = 0;
-	s->map->pangle_y = 0.66;
-	s->map->mv_speed = 0.5f;
-	s->map->rot_speed = 0.2f;
+	s->map->plane_x = 0;
+	s->map->plane_y = 0.66;
+	s->map->mv_speed = 0.3f;
+	s->map->rot_speed = 0.05f;
 	s->map->hit = 0;
 	s->map->n = 0;
+	s->num = 0;
+	s->active_gun = 0;
+	s->shoot = 0;
+	init_text(s);
 	free_double(pos);
+}
+
+void	load_music(t_sdl_manange *s)
+{
+	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
+  		ft_putendl(Mix_GetError());
+	s->sound.chunks[0] = Mix_LoadWAV("music/Chain.mp3");
+	if (s->sound.chunks[0] == NULL)
+		ft_putendl(Mix_GetError());
+	s->sound.chunks[1] = Mix_LoadWAV("music/Shotgun.mp3");
+	if (s->sound.chunks[1] == NULL)
+		ft_putendl(Mix_GetError());
+	s->sound.back = Mix_LoadMUS("music/HBT.mp3");
+	if (s->sound.back == NULL)
+		ft_putendl(Mix_GetError());
+	Mix_PlayMusic(s->sound.back, -1);
+	Mix_VolumeMusic(5);
 }
 
 void	load_textures(t_sdl_manange *s)
 {
-	s->im_surf = (SDL_Surface **)malloc(sizeof(SDL_Surface *) * 7);
-
-	s->im_surf[0] = load_surf("pic/bluestone.bmp");
-	s->im_surf[0] = SDL_ConvertSurfaceFormat(s->im_surf[0], SDL_PIXELFORMAT_ARGB8888, 0);
-
-	s->im_surf[1] = load_surf("pic/pw.bmp");
-	s->im_surf[1] = SDL_ConvertSurfaceFormat(s->im_surf[1], SDL_PIXELFORMAT_ARGB8888, 0);
-
-	s->im_surf[2] = load_surf("pic/st.bmp");
-	s->im_surf[2] = SDL_ConvertSurfaceFormat(s->im_surf[2], SDL_PIXELFORMAT_ARGB8888, 0);
-
-	s->im_surf[3] = load_surf("pic/cs.bmp");
-	s->im_surf[3] = SDL_ConvertSurfaceFormat(s->im_surf[3], SDL_PIXELFORMAT_ARGB8888, 0);
-  
-	s->im_surf[4] = load_surf("pic/mossy.bmp");
-	s->im_surf[4] = SDL_ConvertSurfaceFormat(s->im_surf[4], SDL_PIXELFORMAT_ARGB8888, 0);
-
-	s->im_surf[5] = load_surf("pic/floor.bmp");
-	s->im_surf[5] = SDL_ConvertSurfaceFormat(s->im_surf[5], SDL_PIXELFORMAT_ARGB8888, 0);
-
-	s->im_surf[6] = load_surf("pic/ceil.bmp");
-	s->im_surf[6] = SDL_ConvertSurfaceFormat(s->im_surf[6], SDL_PIXELFORMAT_ARGB8888, 0);
+	s->im_surf = (SDL_Surface **)malloc(sizeof(SDL_Surface *) * 8);
+	s->im_surf[0] = load_image("pic/bluestone.bmp");
+	s->im_surf[1] = load_image("pic/pw.bmp");
+	s->im_surf[2] = load_image("pic/st.bmp");
+	s->im_surf[3] = load_image("pic/cs.bmp");
+	s->im_surf[4] = load_image("pic/mossy.bmp");
+	s->im_surf[5] = load_image("pic/gs.bmp");
+	s->im_surf[6] = load_image("pic/ceil.bmp");
+	s->im_surf[7] = load_image("pic/barrel.png");
 }
 
-int	**init_floor(t_sdl_manange *s)
+void	load_weapon(t_sdl_manange *s)
+{
+	s->status_line = load_image("pic/line.png");
+	s->line_rect.x = 0;
+	s->line_rect.y = HEIGHT;
+	s->line_rect.h = 100;
+	s->line_rect.w = WIDTH;
+	init_sprite(&s->guns[0], "pic/chain", 2);
+	s->guns[0].rect.x = WIDTH/2 -75;
+	s->guns[0].rect.y = HEIGHT-250;
+	s->guns[0].rect.h = 250;
+	s->guns[0].rect.w = 250;
+	init_sprite(&s->guns[1], "pic/s", 6);
+	s->guns[1].rect.x = WIDTH / 2 - 100;
+    s->guns[1].rect.y = HEIGHT - 200;
+    s->guns[1].rect.h = 200;
+    s->guns[1].rect.w = 200;
+	init_sprite(&s->guns[2], "pic/r", 4);
+	s->guns[2].rect.x = WIDTH / 2 - 100;
+    s->guns[2].rect.y = HEIGHT - 200;
+    s->guns[2].rect.h = 200;
+    s->guns[2].rect.w = 300;
+	s->active_gun = 0;
+}
+
+void	draw_sight(t_sdl_manange *s)
 {
 	int i;
-	int j;
-	int	**arr;
-	char **paiste;
-	t_flist *tmp;
 
-	i = -1;
-	tmp = s->begin;
-	arr = (int **)malloc(sizeof(int *) * tmp->vert);
-	while (++i < tmp->vert)
-	{
-		j = -1;
-		arr[i] = (int *)malloc(sizeof(int) * tmp->hor);
-		paiste = ft_strsplit(tmp->line, ' ');
-		while (++j < tmp->hor)
-		{
-			arr[i][j] = ft_atoi(paiste[j]);
-		}
-		tmp = tmp->next;
-	}
-	free_double(paiste);
-	return (arr);
-}
-
-t_flist		*read_file(char *str)
-{
-	int			fd;
-	char		*line;
-	t_flist		*xd;
-	t_flist		*tmp;
-	
-	if ((fd = open(str, O_RDONLY)) == -1)
-		fck_up();
-	xd = (t_flist *)malloc(sizeof(t_flist));
-	tmp = xd;
-	get_next_line(fd, &line);
-	tmp->param = ft_strdup(line);
-	ft_strdel(&line);
-	while ((get_next_line(fd, &line)))
-	{
-		tmp->line = ft_strdup(line);
-		tmp->next = (t_flist *)malloc(sizeof(t_flist));
-		tmp = tmp->next;
-		ft_strdel(&line);
-	}
-	tmp->next = NULL;
-	close(fd);
-	return (xd);
-}
-
-void		count_symbols(t_flist *head)
-{
-	t_flist		*tmp;
-	int			horiz;
-	int			vertic;
-
-	tmp = head;
-	horiz = ft_num_words(head->line, ' ');
-	vertic = list_size(head);
-	while (tmp->next)
-	{
-		tmp->hor = ft_num_words(tmp->line, ' ');
-		if (tmp->hor != horiz)
-		{
-			ft_putendl("Error: wrong num of lines");
-			exit(0);
-		}
-		tmp->vert = vertic;
-		tmp = tmp->next;
-	}
-}
-
-int		list_size(t_flist *head)
-{
-	int		i;
-	t_flist	*tmp;
-
-	tmp = head;
-	i = 0;
-	while (tmp->next)
-	{
-		i++;
-		tmp = tmp->next;
-	}
-	return (i);
-}
-void	free_double(char **s)
-{
-	int		i;
-
-	i = 0;
-	while (s[i])
-	{
-		ft_strdel(&s[i]);
-		i++;
-	}
-	free(s);
-	s = NULL;
+	i = -15;
+	s->map->sight = (unsigned int *)s->win_surface->pixels;
+	while (i < 15)
+    {
+      s->map->sight[HEIGHT * WIDTH / 2 + WIDTH / 2 + i] = 0xff0000; // horiz
+	  s->map->sight[HEIGHT * WIDTH / 2 + (i*WIDTH + WIDTH /2)] = 0xff0000; // vert
+	  i++;
+    }
 }
 
 void	fck_up()
 {
-	//ft_putendl("Do not play dirty games with me!");
-	//ft_putendl("Come on, gimme horny file");
 	ft_putendl("usage: ./wolf3d [map name]");
+	exit (0);
+}
+
+void	mal_er()
+{
+	ft_putendl("Malloc fails");
 	exit (0);
 }

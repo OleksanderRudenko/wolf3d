@@ -46,9 +46,10 @@ void    maluy_pidlogu_ta_stelu(t_sdl_manange *s)
         int floorTexX, floorTexY;
         floorTexX = (int)(currentFloorX * 64) % 64;
         floorTexY = (int)(currentFloorY * 64) % 64;
-
-        *s->map->buffer = ((unsigned int *)s->im_surf[5]->pixels)[64 * floorTexY + floorTexX];
-        *(s->map->buffer + (HEIGHT -2 * y) * WIDTH) = ((unsigned int *)s->im_surf[6]->pixels)[64 * floorTexY + floorTexX];
+        if (!*s->map->buffer)
+          *s->map->buffer = ((unsigned int *)s->im_surf[5]->pixels)[64 * floorTexY + floorTexX];
+        if (!*(s->map->buffer + (HEIGHT -2 * y) * WIDTH) )
+          *(s->map->buffer + (HEIGHT -2 * y) * WIDTH) = ((unsigned int *)s->im_surf[6]->pixels)[64 * floorTexY + floorTexX];
         s->map->buffer += WIDTH;
       }
     }
