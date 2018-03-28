@@ -6,7 +6,7 @@
 #    By: arudenko <arudenko@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2017/10/26 12:17:41 by arudenko          #+#    #+#              #
-#    Updated: 2018/01/04 13:23:12 by arudenko         ###   ########.fr        #
+#    Updated: 2018/03/12 17:37:19 by arudenko         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -78,7 +78,6 @@ SRC = 	ft_atoi.c\
 		ft_list_size.c\
 		get_next_line.c \
 		ft_itoa_base.c \
-		ft_atoi_base.c\
 		
 OBJ	= $(SRC:.c=.o)
 

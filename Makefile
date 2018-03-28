@@ -14,15 +14,20 @@ FILES =	main \
 		text \
 		deletes \
 		load_map \
-		errors
+		errors \
+		draw_wall_inites \
+		map_check \
+		show_fuck \
 
-#add-Werror
+HDRS = includes/woof.h
+
+#add
 SRC = $(addprefix src/, $(addsuffix .c, $(FILES)))
 OBJ = $(addprefix obj/, $(addsuffix .o, $(FILES)))
 OBJ_LIST = $(addsuffix .o, $(FILES))
 SPEED = -O3
 
-FLAGS = -Wall -Wextra
+FLAGS = -Wall -Wextra -Werror
 INCLUDES	=	-I./frameworks/SDL2.framework/Versions/A/Headers \
 				-I./frameworks/SDL2_ttf.framework/Versions/A/Headers \
 				-I./frameworks/SDL2_image.framework/Versions/A/Headers \
@@ -36,19 +41,24 @@ FRAMEWORKS	=	-F./frameworks \
 
 HEADERS = -I./includes -I./libft/
 
-all: $(NAME)
+all: lib $(NAME)
 
 $(NAME): libft/libft.a $(OBJ)
-	@gcc -o $(NAME) $(FLAG) $(SPEED) $(OBJ) $(FRAMEWORKS) libft/libft.a
+	@gcc -o $(NAME) $(FLAG) $(SPEED) $(OBJ) $(FRAMEWORKS) libft/libft.a -g
 	@echo "\033[1;32m 🌈  $(NAME) \033[1;0m\033[32m created.\033[0m"
-libft/libft.a:
+
+libft/libft.a: lib
+
+lib:
 	@make -C ./libft/
-obj/%.o: src/%.c
-	@gcc -o $@ $(FLAG2) $(HEADERS) $(INCLUDES) -c $^
+
+$(OBJ): obj/%.o : src/%.c $(HDRS)
+	@gcc -o $@ $(FLAG2) $(HEADERS) $(INCLUDES) -c $<
+
 clean:
 	@rm -f $(OBJ)
 	@make clean -C ./libft/
-	@echo "\032[31m[ ✔ ] Objects files have been destroyed \033[91m$(OBJ_LIST)"
+	@echo "\032[31m Objects files have been destroyed \033[91m$(OBJ_LIST)"
 
 fclean :
 	@rm -f $(NAME)

@@ -6,7 +6,7 @@
 /*   By: arudenko <arudenko@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/26 15:23:32 by arudenko          #+#    #+#             */
-/*   Updated: 2018/01/04 13:22:50 by arudenko         ###   ########.fr       */
+/*   Updated: 2018/03/12 17:37:53 by arudenko         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,7 +93,6 @@ int					ft_white(int c);
 int					ft_list_size(t_list *begin_list);
 void				ft_swap(int *a, int *b);
 int					get_next_line(const int fd, char **line);
-char    			*ft_itoa_base(int value, int base);
-int					ft_atoi_base(const char *str, int base);
+char				*ft_itoa_base(int value, int base);
 
 #endif
